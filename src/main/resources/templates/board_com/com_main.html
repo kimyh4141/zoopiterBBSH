@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="메인화면" />
+  <meta name="keywords" content="pet hospital search" />
+  <meta name="author" content="2팀" />
+  <title>커뮤니티 전체목록</title>
+  <!--  리뷰게시판 메인 css -->
+  <link rel="stylesheet" href="/css/board_com.css" />
+  <!--  폰트 어썸 : 로고 -->
+  <script src="https://kit.fontawesome.com/6631aa96e6.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="hd-l"></div>
+    <header class="hd">
+      <!-- 프레그먼트 반영:menu  -->
+      <th:block th:replace="~{fragment/menu::gnb}"></th:block>
+    </header>
+    <div class="hd-r"></div>
+
+    <div class="fg-l"></div>
+
+    <div class="fg-r"></div>
+
+    <div class="mn-l"></div>
+    <main class="container">
+      <!-- 메인 컨텐츠 -->
+      <div class="main-list">
+        <div class="list">
+          <div class="main">커뮤니티</div>
+          <div class="selectBox">
+            <select class="select" id="searchType" th:field="${fc.searchType}">
+              <option value="bcHit">조회순</option>
+              <option value="bcUdate">최신순</option>
+              <option value="">좋아요</option>
+            </select>
+            <span class="icoArrow">
+              <i class="fa-solid fa-arrow-down"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sort">
+        <div class="search">
+          <!-- 동물 태그 선택 -->
+          <div class="left">
+            <div class="tag">동물태그</div>
+            <form th:field="${fc.category}" class="selectBox" name="pet">
+              <input type="checkbox" id="dog" class="petTag" name="pet" th:value="강아지">
+              <label for="dog" >강아지</label>
+              <input type="checkbox" id="cat" class="petTag" name="pet" th:value="고양이">
+              <label for="cat">고양이</label>
+              <input type="checkbox"  id="small" class="petTag" name="pet" th:value="소동물">
+              <label for="small">소동물</label>
+              <input type="checkbox" id="other" class="petTag" name="pet" th:value="기타">
+              <label for="other" >기타</label>
+              <button id="checkBtn" type="button">적용</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 글쓰기버튼 -->
+      <div class="write-btn-l"></div>
+      <div class="write-btn">
+        <div>
+          <button type="button" th:onclick="|location.href='@{/bbsc/add}'|">글쓰기</button>
+        </div>
+      </div>
+      <div class="write-btn-r"></div>
+
+      <!-- 선택한 동물태그 -->
+      <div class="tag-list">
+      </div>
+      <div class="tag-list-r"></div>
+
+      <div class="main-nick-l"></div>
+      <div class="main-nick">
+        <!-- 게시글 -->
+        <th:block th:each="Bbsc : ${list}">
+          <input type="text" id="bbscId" th:value="${Bbsc.bbscId}" style="display:none;">
+          <div class="post" th:if="${Bbsc.bcPublic} == 'Y'"
+               th:onclick="|location.href='@{/bbsc/{id}/detail(id=${Bbsc.bbscId})}'|">
+            <div class="info">
+              <div class="pro">
+                <div class="img">
+                  <!--  기본프로필 이미지 -->
+                  <i class="fa-solid fa-circle-user" style="color: #d1d1d1;"></i>
+                </div>
+                <div class="name">
+                  <div th:text="${Bbsc.userNick}">작성자명</div>
+                  <div id="re3" style="color: black; font-size: 12px" th:text="${Bbsc.bcUdate}">clock</div>
+                </div>
+              </div>
+              <div class="sub">
+                <div class="num">
+                  <div class="num-cnt">
+                    조회수
+                    <p th:text = "${Bbsc.bcHit}">0</p>
+                  </div>
+                  <div class="like-icons" id="likeBtn">
+                    <!--  좋아요 누르기 전 아이콘 -->
+                    <i class="fa-regular fa-heart"></i>
+                    <!-- 좋아요 누른 후 아이콘 -->
+                    <!-- <i class="fa-solid fa-heart"></i> -->
+                  </div>
+                </div>
+                <div class="tag" th:if="${not #strings.isEmpty(Bbsc.petType)}" th:text="${Bbsc.petType}">#강아지</div>
+              </div>
+            </div>
+            <div class="preview">
+              <div class="img">
+                <!-- 첨부된 이미지가 있는 경우  -->
+                <img th:if="${#maps.containsKey(imagedFileMap, Bbsc.bbscId)}" th:src="@{|/attach/view/${imagedFileMap[Bbsc.bbscId]}|}">
+                <!-- 기본이미지 -->
+                <i th:if="${not #maps.containsKey(imagedFileMap, Bbsc.bbscId)}" class="fa-solid fa-shield-cat"></i>
+              </div>
+              <div class="review">
+                <div class="hos" th:text="${Bbsc.bcTitle}">슬기로운 커뮤니티</div>
+                <div class="contents">
+                  <p th:text="${Bbsc.bcContent}">
+                    sample
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </th:block>
+      </div>
+      <div class="main-nick-r"></div>
+
+      <!-- 게시판 페이지 -->
+      <div class="page">
+        <!--   이전페이지 정보   -->
+        <th:block th:if="${fc.prev}">
+          <a class="page-item" href=""
+             th:href="@{/bbsc/list/1/{searchType}(searchType=${fc.searchType},category=${param.category})}">
+            <i class="fas fa-angle-double-left"></i>
+          </a>
+          <a class="page-item" href=""
+             th:href="@{/bbsc/list/{reqPage}/{searchType}(reqPage=${fc.startPage-1},searchType=${fc.searchType},category=${param.category})}">
+            <i class="fas fa-angle-left"></i>
+          </a>
+        </th:block>
+
+        <!--   페이지 표시   -->
+        <th:block th:each="pnum : ${#numbers.sequence(fc.startPage,fc.endPage)}">
+          <th:block th:if="${pnum != 0}">
+            <a class="page-item" th:classappend="${fc.rc.reqPage == pnum} ? 'active'" href=""
+              th:href="@{/bbsc/list/{reqPage}/{searchType}(reqPage=${pnum},searchType=${fc.searchType},category=${param.category})}"
+              th:text="${pnum}">
+              1
+            </a>
+          </th:block>
+
+        <!--   다음페이지 정보     -->
+          <th:block th:if="${fc.next}">
+            <a class="page-item" href=""
+              th:href="@{/bbsc/list/{reqPage}/{searchType}(reqPage=${fc.endPage+1},searchType=${fc.searchType},category=${param.category})}">
+              <i class="fas fa-angle-right"></i>
+            </a>
+            <a class="page-item" href=""
+               th:href="@{/bbsc/list/{reqPage}/{searchType}(reqPage=${fc.finalEndPage},searchType=${fc.searchType},category=${param.category})}">
+              <i class="fas fa-angle-double-right"></i>
+            </a>
+          </th:block>
+        </th:block>
+      </div>
+    </main>
+    <div class="mn-r"></div>
+
+    <div class="ft-l"></div>
+    <!-- 프레그먼트 반영 footer -->
+    <th:block th:replace="~{fragment/footer::fnb}"></th:block>
+    <div class="ft-r"></div>
+    <!-- 푸터 팝업 -->
+    <!-- 개인정보 약관 -->
+    <th:block th:replace="~{fragment/footer::ft-modal1}"></th:block>
+    <!-- 이용 약관 -->
+    <th:block th:replace="~{fragment/footer::ft-modal2}"></th:block>
+    <!-- 광고 문의 -->
+    <th:block th:replace="~{fragment/footer::ft-modal3}"></th:block>
+  </div>
+
+  <!-- 햄버거 메뉴 구현 -->
+  <script src="/js/hambuger.js"></script>
+  <!-- footer 개인정보처리방침 모달 구현 -->
+  <script src="/js/ft_modal.js"></script>
+  <!-- 좋아요 버튼 구현 -->
+  <script src="/js/board_likeBtn.js"></script>
+  <!-- 펫 태그 체크박스 이벤트  -->
+  <script src="/js/board_checkPet.js"></script>
+  <!-- 게시글 목록 -->
+  <script src="/js/board_list.js"></script>
+</body>
+
+</html>
